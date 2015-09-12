@@ -1,0 +1,2292 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<link rel="stylesheet" type="text/css" href="../resources/css/ext-all.css" />
+<link rel="stylesheet" type="text/css" href="../shared/example.css" />
+<link rel="stylesheet" type="text/css" href="../ux/css/CheckHeader.css" />
+
+<script type="text/javascript" src="../bootstrap.js"></script>
+<script type="text/javascript" src="JSON.js"></script>
+
+<head>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+        canvas {
+            border: 1px solid #ababab;
+            background: #ababab;
+        }
+    </style>
+    <script src="http:kinetic-v4.0.4.js"></script>
+
+
+    <script>
+
+    // #9C9898;
+
+    var stage;
+    var layer;
+
+
+    var BSSWorkflowId = 1;
+    var BSSWorkflowStepId = 1;
+    var BSSUserId = 1;
+
+    var workflowgrid;
+    var bssWorkflowStatusData;
+    var bssWorkflowStatusListStore;
+    var bssWorkflowActionTypeData;
+    var bssWorkflowActionTypeStore;
+    var bssWorkflowNotificationListStore;
+
+
+
+ //   alert(BSSWFID);
+
+
+    var BSSWFID = getUrlVars()["BSSWFID"];
+    //alert(first);
+
+
+
+    bssWorkflowStatusData = [
+        {id:1, value: 'Pending'},
+        {id:2, value: 'Submit'},
+        {id:3, value: 'Review'},
+        {id:4, value: 'Release'},
+        {id:5, value: 'Complete'},
+        {id:6, value: 'Action'},
+        {id:7, value: 'Notify'}
+    ];
+
+
+
+    bssWorkflowStatusListStore = Ext.create('Ext.data.Store', {
+                fields: [{name: 'id'}, {name: 'value'}],
+                data: bssWorkflowStatusData,
+                listeners: {
+                    load: function () {
+                        //this sets the default value to USA after the store loads
+
+                     //   alert('GG');
+                     //   var combo = Ext.getCmp('idstatustype');
+                     //   combo.setValue('2');
+                    }
+                }
+            }
+    );
+
+    bssWorkflowActionTypeData = [
+        { id:1, value: 'Action'},
+        { id:2, value: 'URL'}
+    ];
+
+    bssWorkflowActionTypeStore = Ext.create('Ext.data.Store', {
+                fields: [{name: 'id'}, {name: 'value'} ],
+                data: bssWorkflowActionTypeData
+            }
+    );
+
+    bssWorkflowNotificationListStore = Ext.create('Ext.data.Store', {
+                fields: [{name: 'id'}, {name: 'value'} ],
+                data: bssWorkflowActionTypeData
+            }
+    );
+
+
+
+    bssWorkflowApprovalStatusData = [ { id:1, value: 'A'},{ id:2, value: 'B'}];
+
+    workflowapprovalstatusliststore = Ext.create('Ext.data.Store', {
+                fields: [{name: 'id'}, {name: 'value'} ],
+                data: bssWorkflowApprovalStatusData
+            }
+    );
+
+    var BSSSIGNOFF_FLAG = false;
+    var BSSADDREMOVEAPPROVERS = false;
+
+    var signoffsStore = Ext.create('Ext.data.Store', {
+        fields: [
+            {name: 'id', type: 'string'},
+            {name: 'masterid', type: 'string'},
+            {name: 'sequence', type: 'string'},
+            {name: 'WorkflowApprover', type: 'string'},
+            {name: 'SignoffDate', type: 'date'},
+            {name: 'SignoffResult', type: 'string'},
+            {name: 'Comments', type: 'string'}
+        ],
+        data:
+                [['1','','','','','','']]
+    });
+
+    bssUserData = [ { id:1, value: 'A'},{ id:2, value: 'B'}];
+
+    userliststore = Ext.create('Ext.data.Store', {
+                fields: [{name: 'id'}, {name: 'value'} ],
+                data: bssUserData
+            }
+    );
+
+
+    var cellEditing6 = Ext.create('Ext.grid.plugin.CellEditing', {
+        clicksToEdit: 1
+    });
+
+    //Get the data
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", "BSSGetComboStore.php?BSSSQLString=SELECT id, NotificationName AS value FROM Notifications", false );
+    xmlHttp.send( null );
+    //alert("DATA: " + xmlHttp.responseText);
+    var bssNotificationData = eval('[' + xmlHttp.responseText + ']');
+    bssWorkflowNotificationListStore.loadData(bssNotificationData,false);
+
+    Ext.Loader.setConfig({
+        enabled: true
+    });
+    Ext.Loader.setPath('Ext.ux', '../ux');
+
+    Ext.require([
+        'Ext.selection.CellModel',
+        'Ext.grid.*',
+        'Ext.data.*',
+        'Ext.util.*',
+        'Ext.state.*',
+        'Ext.form.*',
+        'Ext.ux.CheckColumn', '*'
+    ]);
+
+ //   Ext.onReady(function() {
+ //       Ext.QuickTips.init();
+ //       var bd = Ext.getBody();
+ //   });
+
+
+    window.onload = function() {
+
+        layer = new Kinetic.Layer({ fill: "#B0D2FF"});       // "#B0D2FF"
+
+        stage = new Kinetic.Stage({
+            container: "container",
+            width: 1100,
+            fill: "#00D2FF",
+            height: 600
+
+
+        });
+
+    //    stage.on("dblclick", function() {
+    //        alert("here");
+    //        alert(stage.getMousePosition().x);
+    //        alert(stage.getMousePosition().y);
+    //    });
+
+
+
+        bssWorkflowStatusListStore = Ext.create('Ext.data.Store', {
+                    fields: [{name: 'id'}, {name: 'value'}],
+                    data: bssWorkflowStatusData
+                }
+        );
+
+
+         /*
+        ['Pending'],
+                ['Submit'],
+                ['Review'],
+                ['Release'],
+                ['Complete'],
+                ['Notify'],
+                ['Action']
+
+*/
+
+
+        /*
+
+        bssWorkflowStatusData = [ { id:1, value: 'Pending'},
+                                  { id:2, value: 'Submit'},
+                                  { id:3, value: 'Review'},
+                                  { id:4, value: 'Release'},
+                                  { id:5, value: 'Complete'},
+                                  { id:6, value: 'Notify'},
+                                  { id:7, value: 'Action'}];
+
+        bssWorkflowStatusListStore = Ext.create('Ext.data.Store', {
+                    fields: [{name: 'id'}, {name: 'value'} ],
+                    data: bssWorkflowStatusData
+                }
+        );
+
+*/
+
+
+        /*
+        Id
+        X
+        Y
+        Name
+        Description
+        Revision
+        Status Type
+        Action Type
+        Notification
+        Action URL
+        Instructions
+        ErrorResult
+        */
+
+        var workflowinstanceStore = Ext.create('Ext.data.Store', {
+            fields: [
+                {name: 'id', type: 'string'},
+                {name: 'xloc', type: 'string'},
+                {name: 'yloc', type: 'string'},
+                {name: 'name', type: 'string'},
+                {name: 'description', type: 'string'},
+                {name: 'revision', type: 'string'},
+                {name: 'statustype', type: 'string'},
+                {name: 'ActionType', type: 'string'},
+                {name: 'notification', type: 'string'},
+                {name: 'ActionURL', type: 'string'},
+                {name: 'instructions', type: 'string'},
+                {name: 'errorresult', type: 'string'},
+                {name: 'start', type: 'date'},
+                {name: 'complete', type: 'date'}
+            ],
+            data:
+                    [['1','','','','','','','','','']]
+        });
+
+        ShowWF = new Image();
+        ShowWF.src = "Start.png";
+        StartImage = new Image();
+        StartImage.src = "Start.png";
+        SubmitImage = new Image();
+        SubmitImage.src = "Submit.png";
+        ReviewImage = new Image();
+        ReviewImage.src = "Review.png";
+        ReleaseImage = new Image();
+        ReleaseImage.src = "Release.png";
+        CompleteImage = new Image();
+        CompleteImage.src = "Complete.png";
+        NotifyImage = new Image();
+        NotifyImage.src = "Notify.png";
+        ActionImage = new Image();
+        ActionImage.src = "Action.png";
+
+        DrawForm();
+        stage.draw();
+        layer.draw();
+        layer.show();
+      //  GetWorkFlowList();
+
+        GetWorkflowSteps(1);
+
+       };
+
+        function GetWorkFlowList(){
+
+            var childgrid;
+            var notificationgrid;
+            var actiongrid;
+            var BSSCREATEMASTER_FLAG = false
+            var BSSREADMASTER_FLAG = false
+            var BSSUPDATEMASTER_FLAG = false
+            var BSSDELETEMASTER_FLAG = false
+            var BSSCREATECHILD_FLAG = false
+            var BSSREADCHILD_FLAG = false
+            var BSSUPDATECHILD_FLAG = false
+            var BSSDELETECHILD_FLAG = false
+
+            var BSSChildConfigName = "WorkflowApprovers";
+            var BSSWorkflowNotificationConfigName = "WorkflowNotifications";
+            var BSSWorkflowActionConfigName = "WorkflowActions";
+            var bssNewFieldNameData;
+            var bssNewFlowManagerData;
+
+            bssFieldNameData = [ { id:1, value: 'AGLOBAL'},{ id:2, value: 'AUSER'}];
+            bssNewFlowManagerData = [ { id:1, value: 'AG'},{ id:2, value: 'AU'}];
+
+
+            fieldStore = Ext.create('Ext.data.Store', {
+                        fields: [{name: 'id'}, {name: 'value'} ],
+                        data: bssFieldNameData
+                    }
+            );
+
+            flowmanagerStore = Ext.create('Ext.data.Store', {
+                        fields: [{name: 'id'}, {name: 'value'} ],
+                        data: bssNewFlowManagerData
+                    }
+            );
+
+            var cellEditing = Ext.create('Ext.grid.plugin.CellEditing', {
+                clicksToEdit: 1
+            });
+
+
+            // create the data store
+            var workflowstore = Ext.create('Ext.data.Store', {
+                fields: [
+                    {name: 'id', type: 'string'},
+                    {name: 'sequence', type: 'string'},
+                    {name: 'masterid', type: 'string'},
+                    {name: 'WorkflowName', type: 'string'},
+                    {name: 'Workflowdescription', type: 'string'}
+                //    {name: 'WorkflowAvailableFor', type: 'string'}
+                ],
+                data:
+                        [['1','','','','','','','','','','']]
+            });
+
+            flowmanagerStore = Ext.create('Ext.data.Store', {
+                        fields: [{name: 'id'}, {name: 'value'} ],
+                        data: bssNewFlowManagerData
+                    }
+            );
+
+
+            //Get the data
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", "BSSGetComboStore.php?BSSSQLString=SELECT id, QueryName AS value FROM Queries", false );
+            xmlHttp.send( null );
+      //      alert("DATA: " + xmlHttp.responseText);
+            var bssNewFieldNameData = eval('[' + xmlHttp.responseText + ']');
+            fieldStore.loadData(bssNewFieldNameData,false);
+
+//Get the data
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", "BSSGetComboStore.php?BSSSQLString=SELECT id, Email AS value FROM users", false );
+            xmlHttp.send( null );
+    //        alert("DATA: " + xmlHttp.responseText);
+            var bssNewFlowManagerData = eval('[' + xmlHttp.responseText + ']');
+            flowmanagerStore.loadData(bssNewFlowManagerData,false);
+
+
+            try{
+                //Get the data
+                xmlHttp = new XMLHttpRequest();
+                xmlHttp.open( "GET", "BSSGetJSData.php5?BSSConfigName=" + "AdvWorkflows" + "&BSSWhereClause=" + "id>0 ORDER BY sequence,id", false );
+                xmlHttp.send( null );
+     //           alert("DATA: " + xmlHttp.responseText);
+                var newdata = eval('[' + xmlHttp.responseText + ']');
+                workflowstore.loadData(newdata,false);
+            }catch(e)
+            {document.write("<p>" + "ERROR: " + e.message + "</p>");
+            }
+
+
+            workflowgrid = Ext.create('Ext.grid.Panel', {
+                store: workflowstore,
+                selModel: 'cellmodel',
+                listeners: {
+                    itemclick: function() {
+                        // ProcessChildTab();
+                    }},
+                columns: [
+                    {id: 'id1',
+                        header: 'Id',
+                        disabled: true,
+                        listeners: {
+                            beforeedit: function(){
+                                return false;
+                            }},
+                        width: 40,
+                        dataIndex: 'id',
+                        editor: {
+                            allowBlank: false
+                        }
+                    },
+                    {id: 'sequence1',
+                        header: 'Sequence',
+                        disabled: false,
+                        width: 0,
+                        dataIndex: 'sequence',
+                        editor: {
+                            allowBlank: false
+                        }
+                    },
+                    {id: 'masterid1',
+                        header: 'Master Id',
+                        disabled: false,
+                        width: 0,
+                        dataIndex: 'masterid',
+                        editor: {
+                            allowBlank: false
+                        }
+
+                    },
+                    {id: 'WorkflowName',
+                        header: 'Workflow Name',
+                        width: 150,
+                        editable: false,
+                        dataIndex: 'WorkflowName',
+                        editor: {
+                            allowBlank: true
+                        }
+                    },
+                    {
+                        id: 'Workflowdescription',
+                        header: 'Workflow Description',
+                        width: 300,
+                        dataIndex: 'Workflowdescription',
+                        editor: {
+                            allowBlank: false
+                        }
+                    }
+
+                    /*,
+                    { header:'Workflow Available For Query', dataIndex:'WorkflowAvailableFor', width: 200,
+                        editor:
+                        { xtype: 'combobox',
+                            typeAhead: true,
+                            selectOnTab: true,
+                            triggerAction: 'all',
+                            fields:['id','value'],
+                            store: fieldStore, //[[1, 'GLOBAL'],[2, 'USER']],
+                            valueField:'id',
+                            displayField:'value',
+                            multiSelect: false,
+                            queryMode: 'local',
+                            lazyRender: true,
+                            listClass: 'x-combo-list-small'},
+                        renderer: function(val) {var matching =  fieldStore.queryBy( function(rec){ return rec.data.id == val; }); return (matching.items[0]) ? matching.items[0].data.value : ''}
+
+                        //       renderer: function(val) { var CodesStore = Ext.create('Ext.data.Store', { fields: [ {name: 'id'}, {name: 'value'} ], data: bssFieldNameData }); var matching = CodesStore.queryBy( function(rec){ return rec.data.id == val; }); return (matching.items[0]) ? matching.items[0].data.value : ''} },
+
+
+                    } */
+                ],
+                width: 520,
+                height: 350,
+                x: 0,
+                y: 0,
+           //     title: 'Workflows',
+                frame: true,
+                tbar: [{text: 'Add',    handler : function() {processInsert("AdvWorkflows",workflowgrid,workflowstore);}},
+                    {text: 'Save',   handler : function() {processUpdate("AdvWorkflows",workflowgrid,workflowstore);}},
+                    {text: 'Delete', handler : function() {processDelete("AdvWorkflows",workflowgrid,workflowstore);}},
+                    {text: 'Get Workflow Steps', handler : function() {GetWorkflowSteps("AdvWorkflows",workflowgrid,workflowstore);}}
+                ]
+                , plugins: [cellEditing]
+            });
+
+            absolute1 = Ext.create('Ext.window.Window', {
+                title: 'Workflow Maintenance',
+                x:50,
+                y:50,
+                width: 550,
+                height: 450,
+        //        layout:'absolute',
+                defaults: {
+                    bodyStyle: 'padding:10px'
+                },
+                items: [workflowgrid]
+            });
+
+            absolute1.show();
+
+
+        }
+
+
+        function processInsert(BSSConfigName, BSSGrid, BSSStore)
+        {
+            //  Get default data from config array
+
+            try{
+                idval = 0;
+                var sm = workflowgrid.getSelectionModel();
+                var selrecords = sm.getSelection();
+                if(sm.getCount() > 0){
+                    var fieldname = "id";
+                    var idval = selrecords[0].get('id')
+                    // alert(idval);
+                }
+
+                //   return;
+
+                var xmlHttp = null;
+                xmlHttp = new XMLHttpRequest();
+                xmlHttp.open( "GET", "BSSPerformInsert.php5?BSSConfigName=" + BSSConfigName+ "&masterid=" + idval, false );
+                xmlHttp.send(null);
+
+                // document.write("<p>"+ xmlHttp.responseText + "</p>");
+
+                newdata = eval('[' + xmlHttp.responseText + ']');
+
+                BSSStore.add(newdata);
+            }catch(e)
+            {document.write("<p>" + e.message + "</p>");
+            }
+
+        }
+
+        function processDelete(BSSConfigName, BSSGrid, BSSStore)
+        {
+
+            var sm = BSSGrid.getSelectionModel();
+            BSSStore.remove(sm.getSelection());
+
+            if (BSSStore.getCount() > 0) {
+                sm.select(0);
+            }
+
+            var delrecords = BSSStore.getRemovedRecords();
+
+            var fieldname = "id";
+
+
+
+
+            //"&id=" + delrecords[0].get('id'),
+
+            try{
+                var xmlHttp = null;
+                xmlHttp = new XMLHttpRequest();
+                xmlHttp.open( "GET", "BSSPerformDelete.php5?BSSConfigName=" + BSSConfigName + "&id=" + delrecords[0].get('id'), false);
+                xmlHttp.send(null);
+
+                //alert(xmlHttp.responseText);
+
+                BSSStore.removed = [];
+
+
+            }catch(e)
+            {    alert(e.message); //document.write("<p>" + e.message + "</p>");
+            }
+
+
+        }
+
+        function processUpdate(BSSConfigName, BSSGrid, BSSStore)
+        {
+
+
+            var updrecords = BSSStore.getUpdatedRecords();
+
+            var fieldname = "phone_type";
+            var rec = new BSSStore.model();
+
+            jsenc = "";
+            var fieldcount = rec.fields.getCount();
+
+            var xfieldtype;
+            var xfieldname;
+
+
+            for(x = 0; x < fieldcount; x++){
+                xfieldtype = rec.fields.getAt(x).type.type;
+                xfieldname = rec.fields.getAt(x).name;
+
+                switch(xfieldtype){
+                    case "date":
+                        jsenc = jsenc + formatDate(updrecords[0].get(xfieldname)) + "|";
+                        break;
+                    case "bool":
+                        if(updrecords[0].get(xfieldname).toString()=='true'){
+                            jsenc = jsenc + "1" + "|";
+                        }else{
+                            jsenc = jsenc + "0" + "|";
+                        }
+                        break;
+                    default:
+                        jsenc = jsenc + updrecords[0].get(xfieldname) + "|";
+                }
+            }
+
+
+            try{
+                var xmlHttp = null;
+                xmlHttp = new XMLHttpRequest();
+                xmlHttp.open( "GET", "BSSPerformUpdate.php5?BSSConfigName=" + BSSConfigName + "&id=" + jsenc, false);
+                xmlHttp.send(null);
+                //alert(xmlHttp.responseText);
+
+                //REmove the red triangle
+                BSSStore.each(function(r){
+                    r.commit();
+                });
+
+
+            }catch(e)
+            {alert(e.getMessage());}
+
+
+    }
+
+ function AddStep(StatusType, X,  Y,Name,DoCreate,STEPID)
+        {
+                       //,'',1,0)
+
+    //        alert("Adding Step");
+
+            var xstepbox;
+            var xstepboxtext;
+
+            var strColor = "green";
+            var beforedragx;
+            var beforedragy;
+            var statusid;
+            var StepTypeImage = new Array;
+            StepTypeImage[STEPID] = new Image();
+            StepTypeImage[STEPID].src = StatusType + ".png";
+
+
+      //      alert("BEFORE: " + StepTypeImage[STEPID].src);
+
+            if(DoCreate == 1){
+                X=490;
+                Y=280;
+            }
+
+
+
+            var BSSStepId = 0;
+            var xtextoffset = 0; //8;
+            var ytextoffset = 0; //11;
+
+
+            //    alert(X + "    " + Y);
+            switch(StatusType)
+            {
+                case "START":
+                    strColor = "green";
+                    xtextoffset = 13;
+                    ytextoffset = 11;
+                    statusid = 1;
+                    break;
+                case "SUBMIT":
+                    strColor = "blue";
+                    xtextoffset = 8;
+                    ytextoffset = 11;
+                    statusid = 2;
+                    break;
+                case "REVIEW":
+                    strColor = "red";
+                    xtextoffset = 8;
+                    ytextoffset = 12;
+                    statusid = 3;
+                    break;
+                case "RELEASE":
+                    strColor = "purple";
+                    xtextoffset = 6;
+                    ytextoffset = 11;
+                    statusid = 4;
+                    break;
+                case "COMPLETE":
+                    strColor = "green";
+                    xtextoffset = -2;
+                    ytextoffset = 11;
+                    statusid = 5;
+                    break;
+                case "ACTION":
+                    strColor = "brown";
+                    xtextoffset = 8;
+                    ytextoffset = 11;
+                    statusid = 6;
+                    break;
+                case "NOTIFY":
+                    strColor = "black";
+                    xtextoffset = 9;
+                    ytextoffset = 11;
+                    statusid = 7;
+                    break;
+            }
+
+
+          //  alert("BSSCreateWorkflowStep.php?BSSMasterId=" + BSSWorkflowId + "&name=" + StatusType  + "&statustype=" + StatusType + "&xloc=" + 0 + "&yloc=" + 0);
+
+          //  alert(BSSWorkflowId);
+
+            if(DoCreate == 1){
+            var xmlHttp = null;
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", "BSSCreateWorkflowStep.php?BSSWorkflowId=" + BSSWorkflowId + "&name=" + StatusType  + "&statustype=" + statusid + "&xloc=" + 490 + "&yloc=" + 280, false );
+            xmlHttp.send(null);
+           //                    alert("Creating a step insert record");
+
+            // ZZZZZZ Get workflow status
+
+
+
+
+
+            BSSStepId = xmlHttp.responseText;
+            }else
+            {
+                BSSStepId = STEPID;
+            }
+        //    alert("CREATE ID: " + xmlHttp.responseText);
+
+        //    try{
+        //        xstepbox.setAttrs().id = BSSStepId;
+        //    }catch(e){alert(e.message);}
+
+
+
+            var group = new Kinetic.Group({
+                draggable: false,
+                id: BSSStepId
+
+            });
+
+
+            StepTypeImage[STEPID].onload = function() {
+
+       //         alert("AFTER: " + StepTypeImage[STEPID].src);
+
+            xstepbox = new Kinetic.Image({
+                id: BSSStepId, x: X, y: Y, width: 70,height: 35,text: StatusType,image: StepTypeImage[STEPID],stroke: "#ababab",strokeWidth: 1,draggable: false
+            });
+  //          };  // End of Image setup
+
+
+
+
+
+       //     alert(StatusType);
+       //     alert(X);
+       //     alert(Y);
+
+           //     alert(Y);
+
+                YN = Number(Y) + ytextoffset;
+
+                XN = Number(X) + xtextoffset;
+
+             //   alert(YN);
+
+            var xstepboxtext = new Kinetic.Text({
+                id:BSSStepId, x: XN ,y: YN,text: StatusType,fontSize: 10,fontFamily: "Calibri",textFill: strColor
+            });
+
+           //     var xstepboxtextA = new Kinetic.Text({
+           //         id:BSSStepId, x: X ,y: 81,text: "XXXXXXXXXX",fontSize: 10,fontFamily: "Calibri",textFill: strColor
+           //     });
+
+
+        //    xstepboxtext.moveToTop();
+
+
+            group.add(xstepbox);
+            group.add(xstepboxtext);
+
+
+      //     layer.add(xstepboxtextA);
+
+            group.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            group.on("mouseout", function() {
+                document.body.style.cursor = "default";
+            });
+            group.on("mousedown", function() {
+                beforedragx = this.getAbsolutePosition().x;
+                beforedragy = this.getAbsolutePosition().y;
+           //     alert(beforedragx);
+            });
+
+
+            group.on("dblclick", function() {
+               // alert('dblclick' +  this.getAttrs().text);
+
+
+                //alert("show win");
+
+                valx = this.getPosition().x;
+                valy = this.getPosition().y;
+
+
+                Ext.Loader.setConfig({enabled: true});
+
+                Ext.Loader.setPath('Ext.ux', '../ux/');
+                Ext.require([
+                    'Ext.form.*',
+                    'Ext.window.Window',
+                    'Ext.data.*',
+                    'Ext.ux.FieldReplicator'
+                ]);
+
+
+     //           Ext.onReady(function() {
+
+
+                // *****************************
+
+         //       alert("BSSGetAdvWorkflowStepData.php?BSSWorkflowStepId=" +  xstepbox.getAttrs().id);
+
+                var BSSWorkflowStepName;
+
+                BSSWorkflowStepId = xstepbox.getAttrs().id;
+
+                try{
+                    //Get the data
+                    xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open( "GET", "BSSGetAdvWorkflowInstanceStepData.php?BSSWorkflowStepId=" +  xstepbox.getAttrs().id, false );
+                    xmlHttp.send( null );
+                    // alert("DATA: " + xmlHttp.responseText);
+                    var wsdata =eval('[' + xmlHttp.responseText + ']');
+
+                 //  var wsdata = JSON.parse(xmlHttp.responseText);
+
+
+                    /*
+
+                    alert(wsdata[0].id);
+                    alert(wsdata[1].ActionURL);
+                    alert(wsdata[2].xloc);
+                    alert(wsdata[3].yloc);
+                    alert(wsdata[4].ActionType);
+                    alert(wsdata[5].statustype);
+                    alert(wsdata[6].Notification);
+                    alert(wsdata[7].Revision);
+                    alert(wsdata[8].Started);
+                    alert(wsdata[9].Completed);
+                    alert(wsdata[10].Instructions);
+                    alert(wsdata[11].ErrorResult);
+                    alert(wsdata[12].name);
+                    alert(wsdata[13].description);
+
+
+
+                    {id:1, value: 'Pending'},
+                    {id:2, value: 'Submit'},
+                    {id:3, value: 'Review'},
+                    {id:4, value: 'Release'},
+                    {id:5, value: 'Complete'},
+                    {id:6, value: 'Notify'},
+                    {id:7, value: 'Action'}
+                    */
+
+                    var BSSISACTION = true;
+                    var BSSISNOTIFICATION = true;
+
+                    if(StatusType == 'ACTION')
+                    {
+                        BSSISACTION = false;
+                    }
+
+                    if(StatusType == 'NOTIFY')
+                    {
+                        BSSISNOTIFICATION = false;
+                    }
+
+
+                    var BSSID = wsdata[0].id;
+
+                    var BSSXLOC = wsdata[0].xloc;
+                    var BSSYLOC = wsdata[0].yloc;
+
+
+                    if(BSSISACTION == false){
+
+
+                        var BSSActionURL = wsdata[0].ActionURL;
+
+                        var BSSActionType = wsdata[0].ActionType;
+                        if(BSSActionType==''){BSSActionType=1;}
+                        var BSSActionTypeValue = bssWorkflowActionTypeData[BSSActionType - 1].value;
+                    }
+
+                    var BSSstatustype = wsdata[0].statustype;
+                    if(BSSstatustype==''){BSSstatustype=1;}
+         //           alert(BSSstatustype);
+                    var BSSstatustypeValue =  bssWorkflowStatusData[BSSstatustype - 1].value;
+
+
+                    if(BSSISNOTIFICATION == false){
+                        var BSSNotification = wsdata[0].Notification;
+                        var BSSNotificationValue = "";
+                        var r = bssWorkflowNotificationListStore.find('id',BSSNotification);   // find the index of the id in the array
+                       // alert(r);
+                        if(BSSNotification != ''){
+                           BSSNotificationValue = bssWorkflowNotificationListStore.getAt(r).get('value');  // get the value
+                        }
+                    }
+
+                    var BSSRevision = wsdata[0].Revision;
+                    var BSSStarted = wsdata[0].Started;
+                    var BSSCompleted = wsdata[0].Completed;
+                    var BSSInstructions = wsdata[0].Instructions;
+                    var BSSErrorResult = wsdata[0].ErrorResult;
+                    var BSSName = wsdata[0].name;
+                    var BSSDescription = wsdata[0].description;
+
+
+                  //  masterStore.loadData(newdata,false);
+                }catch(e)
+                {alert("Master Data Get ERROR: " + e.message);
+                }
+
+
+
+                var BSSHideApprovalTab = true;
+
+                if(StatusType == 'REVIEW'){
+                    BSSHideApprovalTab = false;
+                }
+
+
+
+                try{
+
+                    var signoffs = Ext.create('Ext.grid.Panel', {
+                        id: 'signoffgrid',
+                        hidden: BSSHideApprovalTab,
+                        store: signoffsStore,
+                    //    listeners: {itemclick: function() {alert('SSS');}},
+                        listeners: {activate: function() {GetSignOffs();}},
+                        selModel: 'cellmodel',
+                        columns: [
+                            {id: 'idsignoff',
+                                header: 'Id',
+                                disabled: true,
+                                listeners: {
+                                    beforeedit: function(){
+                                        return false;
+                                    }},
+                                width: 10,
+                                dataIndex: 'id',
+                                editor: {
+                                    allowBlank: false
+                                }
+                            },
+                            {id: 'masteridsignoff',
+                                header: 'Id',
+                                disabled: true,
+                                listeners: {
+                                    beforeedit: function(){
+                                        return false;
+                                    }},
+                                width: 10,
+                                dataIndex: 'masterid',
+                                editor: {
+                                    allowBlank: false
+                                }
+                            },{id: 'sequenceasignoff',
+                                header: 'Id',
+                                disabled: true,
+                                listeners: {
+                                    beforeedit: function(){
+                                        return false;
+                                    }},
+                                width: 10,
+                                dataIndex: 'sequence',
+                                editor: {
+                                    allowBlank: false
+                                }
+                            },
+                            {id: 'idWorkflowApprover',
+                                header: 'Workflow Approver',
+                                disabled: false,
+                                width: 180,
+                                dataIndex: 'WorkflowApprover',
+                                editor:
+                                { xtype: 'combobox',
+                                    typeAhead: true,
+                                    selectOnTab: true,
+                                    triggerAction: 'all',
+                                    fields:['id','value'],
+                                    store: userliststore, //[[1, 'GLOBAL'],[2, 'USER']],
+                                    valueField:'id',
+                                    displayField:'value',
+                                    multiSelect: false,
+                                    queryMode: 'local',
+                                    lazyRender: true,
+                                    listClass: 'x-combo-list-small'},
+                                renderer: function(val) {var matching =  userliststore.queryBy( function(rec){ return rec.data.id == val; }); return (matching.items[0]) ? matching.items[0].data.value : ''}
+                            },
+
+                            {id: 'idSignoffDate',
+                                header: 'Signoff Date',
+                                disabled: false,
+                                width: 100,
+                                dataIndex: 'SignoffDate',
+                                editor: {
+                                    allowBlank: false
+                                }
+                            },
+
+                            {id: 'idSignoffResult',
+                                header: 'Signoff Result',
+                                disabled: false,
+                                width: 100,
+                                dataIndex: 'SignoffResult',
+                                editor:
+                                { xtype: 'combobox',
+                                    typeAhead: true,
+                                    selectOnTab: true,
+                                    triggerAction: 'all',
+                                    fields:['id','value'],
+                                    store: workflowapprovalstatusliststore, //[[1, 'GLOBAL'],[2, 'USER']],
+                                    valueField:'id',
+                                    displayField:'value',
+                                    multiSelect: false,
+                                    queryMode: 'local',
+                                    lazyRender: true,
+                                    listClass: 'x-combo-list-small'},
+                                renderer: function(val) {var matching =  workflowapprovalstatusliststore.queryBy( function(rec){ return rec.data.id == val; }); return (matching.items[0]) ? matching.items[0].data.value : ''}
+
+
+                            },
+                            {id: 'idComments',
+                                header: 'Comments',
+                                disabled: false,
+                                width: 100,
+                                dataIndex: 'Comments',
+                                editor: {
+                                    allowBlank: false
+                                }
+                            }],
+                        width: 350,
+                        height: 200,
+                        x: 2,
+                        y: 2,
+                        title: 'Approval Status',
+                        frame: true,
+                        tbar: [{text: 'Approve', disabled: BSSSIGNOFF_FLAG, handler : function() {ApproveWorkflow("Workflows");}},
+                            {text: 'Reject', disabled: BSSSIGNOFF_FLAG, handler : function() {RejectWorkflow("Workflows");}},
+                            {text: 'Add Approver', disabled: BSSADDREMOVEAPPROVERS, handler : function() {AddApprovers();}},
+                            {text: 'Remove Approver',disabled: BSSADDREMOVEAPPROVERS, handler : function() {removeApprovers();}}
+
+
+                        ],
+                        plugins: [cellEditing6]
+                    });
+
+
+
+
+               //     alert(BSSISACTION);
+
+             //       alert(BSSISNOTIFICATION);
+
+                    var form = Ext.create('Ext.form.Panel', {
+                        id: 'idwsform',
+                        plain: false,
+                        border: 0,
+                        title: 'Status Detail',
+                        width: 360,
+                        bodyPadding: 5,
+                        url: 'BSSSaveWorkflowStep.php',
+
+                        fieldDefaults: {
+                            labelWidth: 70,
+                            anchor: '100%'
+                        },
+
+                        layout: {
+                            type: 'vbox',
+                            align: 'stretch'  // Child items are stretched to full width
+                        },
+
+
+                        items: [
+                            {
+                                id: 'id',
+                                xtype: 'textfield',
+                                fieldLabel: 'id',
+                                name: 'id',
+                                dataIndex: 'id',
+                                value: BSSStepId,
+                                disabled: true
+                            },
+                            {
+                                id: 'idxloc',
+                                xtype: 'textfield',
+                                fieldLabel: 'X',
+                                name: 'xloc',
+                                dataIndex: 'xloc',
+                                value: BSSXLOC, //  valx / 70,
+                                disabled: true
+                            },
+                            {
+                                id: 'idyloc',
+                                xtype: 'textfield',
+                                fieldLabel: 'Y',
+                                name: 'yloc',
+                                dataIndex: 'yloc',
+                                value: BSSYLOC,   //valy / 35,
+                                disabled: true
+                            },
+                            {
+                                id: 'idname',
+                                xtype: 'textfield',
+                                fieldLabel: 'Name',
+                                name: 'name',
+                                dataIndex: 'name',
+                                value: BSSName
+                            },
+                            {
+                                id: 'iddescription',
+                                xtype: 'textfield',
+                                fieldLabel: 'Description',
+                                name: 'description',
+                       //         dataIndex: 'description',
+                                value: BSSDescription
+                            },
+                            {
+                                id: 'idfrevision',
+                                name: 'txtrevision',
+                                xtype: 'textfield',
+                                fieldLabel: 'Revision',
+                                dataIndex: 'revision',
+                                hidden: true,
+                                value: BSSRevision
+                            },
+                            {
+                                id: 'idstatustype',
+                                xtype: 'combo',
+                                store: bssWorkflowStatusListStore,
+                                valueField:'id',
+                                displayField:'value',
+                                fieldLabel: 'Status Type',
+                                queryMode: 'local',
+                         //       selectOnTab: false,
+                                name: 'statustype',
+                                dataIndex: 'statustype',
+                        //        value: BSSstatustypeValue,
+                                submitValue : true,
+                           //     hiddenName : 'id'
+                              //  flex: 1,
+                                  forceSelection: false
+                           //     disabled: true
+
+
+
+                            },
+                            {
+                                id: 'idactontype',
+                                hidden: BSSISACTION,
+                                xtype: 'combo',
+                                store: bssWorkflowActionTypeStore,
+                                valueField:'id',
+                                displayField:'value',
+                                fieldLabel: 'Action Type',
+                                queryMode: 'local',
+                                selectOnTab: false,
+                                name: 'actiontype',
+                                dataIndex: 'ActionType'
+                      //          value: BSSActionTypeValue
+                            },
+                            {
+                                id: 'idnotification',
+                                hidden: BSSISNOTIFICATION,
+                                xtype: 'combo',
+                                store: bssWorkflowNotificationListStore,
+                                valueField:'id',
+                                displayField:'value',
+                                fieldLabel: 'Notification',
+                                queryMode: 'local',
+                                selectOnTab: false,
+                                name: 'notification',
+                                dataIndex: 'notification'
+                             //   value: BSSNotificationValue
+                            },
+                            {
+                                id: 'idactionurl',
+                                hidden: BSSISACTION,
+                                xtype: 'textfield',
+                                fieldLabel: 'Action URL',
+                                name: 'ActionURL',
+                                dataIndex: 'ActionURL',
+                                value: BSSActionURL
+
+                            },
+                            {
+                                id: 'idinstructions',
+                                xtype: 'textarea',
+                                fieldLabel: 'Instructions',
+                                hideLabel: false,
+                                name: 'instructions',
+                                dataIndex: 'instructions',
+                                value: BSSInstructions,
+                                style: 'margin:0', // Remove default margin
+                                flex: 1  // Take up all *remaining* vertical space
+                            }
+
+                            /* ,
+                            {
+                                id: 'iderrorresult',
+                                xtype: 'textarea',
+                                fieldLabel: 'Error Result',
+                                hideLabel: false,
+                                name: 'errorresult',
+                                dataIndex: 'errorresult',
+                                value: BSSErrorResult,
+                                style: 'margin:0', // Remove default margin
+                                flex: 1  // Take up all *remaining* vertical space
+                            },
+                            {
+                                id: 'idstart',
+                                xtype: 'datefield',
+                                fieldLabel: 'Start',
+                                name: 'start',
+                                dataIndex: 'start',
+                                value: BSSStarted,
+                                disabled: true
+                            },
+                            {
+                                id: 'idcomplete',
+                                xtype: 'datefield',
+                                fieldLabel: 'Complete',
+                                name: 'complete',
+                                dataIndex: 'complete',
+                                value: BSSCompleted,
+                                disabled: true
+                            }    */
+                        ]
+                    });
+
+
+
+                    var form1 = Ext.create('Ext.form.Panel', {
+                        id: 'idwsformh',
+                        plain: false,
+                        border: 0,
+                        title: 'Process Result',
+                        width: 290,
+                        bodyPadding: 5,
+                        url: 'BSSSaveWorkflowStep.php',
+
+                        fieldDefaults: {
+                            labelWidth: 70,
+                            anchor: '100%'
+                        },
+
+                        layout: {
+                            type: 'vbox',
+                            align: 'stretch'  // Child items are stretched to full width
+                        },
+
+
+                        items: [
+
+                            {
+                                id: 'idstart',
+                                xtype: 'datefield',
+                                fieldLabel: 'Start',
+                                name: 'start',
+                                dataIndex: 'start',
+                                value: BSSStarted,
+                                disabled: true
+                            },
+                            {
+                                id: 'idcomplete',
+                                xtype: 'datefield',
+                                fieldLabel: 'Complete',
+                                name: 'complete',
+                                dataIndex: 'complete',
+                                value: BSSCompleted,
+                                disabled: true
+                            },
+                            {
+                                id: 'iderrorresult',
+                                xtype: 'textarea',
+                                fieldLabel: 'Error Result',
+                                hideLabel: false,
+                                name: 'errorresult',
+                                dataIndex: 'errorresult',
+                                value: BSSErrorResult,
+                                style: 'margin:0', // Remove default margin
+                                flex: 1  // Take up all *remaining* vertical space
+                            }
+                        ]
+                    });
+
+
+
+
+
+
+                    var tabs = Ext.create('Ext.tab.Panel', {
+                      //  renderTo: 'tabs1',
+                        width: 450,
+                        activeTab: 0,
+                        defaults :{
+                            bodyPadding: 10
+                        },
+                        items: [form, form1, signoffs]
+                    });
+
+
+                    Ext.getCmp('idstatustype').setValue(BSSstatustype);
+                    Ext.getCmp('idstatustype').setRawValue(BSSstatustypeValue);
+
+                    Ext.getCmp('idactontype').setRawValue(BSSActionType);
+                    Ext.getCmp('idactontype').setValue(BSSActionTypeValue);
+
+                    Ext.getCmp('idnotification').setRawValue(BSSNotification);
+                    Ext.getCmp('idnotification').setValue(BSSNotificationValue);
+
+                 //Ext.getCmp('idstatustype').valueField = BSSstatustype;
+
+                    var win = Ext.create('Ext.window.Window', {
+                        title: 'Workflow Step Description',
+                        collapsible: true,
+                        animCollapse: true,
+                        maximizable: true,
+                        width: 600,
+                        height: 400,
+                        minWidth: 300,
+                        minHeight: 200,
+                        layout: 'fit',
+                        items: tabs, //form,
+
+
+                        dockedItems: [{
+                            xtype: 'toolbar',
+                            dock: 'bottom',
+                            ui: 'footer',
+                            layout: {
+                                pack: 'center'
+                            },
+                            items: [{
+                                minWidth: 80,
+                                text: 'Save',
+
+                                handler: function(){
+
+                                //    alert(bssWorkflowStatusData[BSSstatustype - 1].value);
+                                //    alert(bssWorkflowStatusData[BSSstatustype - 1].id);
+                                    alert('1');
+
+                                    var BSSNewNotification = "";
+                                    var idactionurlval = "";
+                                    var BSSNewActionType = "";
+
+                                    var idval = Ext.getCmp('idwsform').getForm().findField("id").getValue();
+                                    var idxlocval = Ext.getCmp('idwsform').getForm().findField("idxloc").getValue();
+                                    var idylocval = Ext.getCmp('idwsform').getForm().findField("idyloc").getValue();
+                                    var idnameval = Ext.getCmp('idwsform').getForm().findField("idname").getValue();
+                                    var iddescriptionval = Ext.getCmp('idwsform').getForm().findField("iddescription").getValue();
+                                    var idrevisionval = Ext.getCmp('idwsform').getForm().findField("idfrevision").getValue();
+                                    var idinstructionsval = Ext.getCmp('idwsform').getForm().findField("idinstructions").getValue();
+                                    alert('2');
+                                 //   alert(Ext.getCmp('idwsform').getForm().findField("idstatustype").getRawValue());
+                                 //   alert(Ext.getCmp('idwsform').getForm().findField("idstatustype").getValue());
+                                //    alert(Ext.getCmp('idwsform').getForm().findField("idstatustype").toString());
+
+                                    var r = bssWorkflowStatusListStore.find('value',Ext.getCmp('idwsform').getForm().findField("idstatustype").getRawValue());
+                                    var BSSNewStatusType = bssWorkflowStatusListStore.getAt(r).get('id');
+                                    alert('3');
+                                    alert(BSSNewStatusType);
+                                    if(BSSNewStatusType == 6){
+                                        var r = bssWorkflowActionTypeStore.find('value',Ext.getCmp('idwsform').getForm().findField("idactontype").getRawValue());
+                                        BSSNewActionType = bssWorkflowActionTypeStore.getAt(r).get('id');
+                                        idactionurlval = Ext.getCmp('idwsform').getForm().findField("idactionurl").getValue();
+                                    }
+                                        alert('4');
+                                  //  alert(Ext.getCmp('idwsform').getForm().findField("idnotification").getValue());
+                                    if(BSSNewStatusType == 7){
+                                    var r = bssWorkflowNotificationListStore.find('value',Ext.getCmp('idwsform').getForm().findField("idnotification").getRawValue());
+
+
+                                    if(r > -1){
+                                    BSSNewNotification = bssWorkflowNotificationListStore.getAt(r).get('id');
+                                    }else{BSSNewNotification=0}
+                                    }
+                                    alert('5');
+
+
+                                    //    function getCBSValue(cb, nameIn, nameOut){
+                                //        try{
+                                //            var r = cb.getStore().find(nameIn,cb.getValue());
+                                //            return cb.getStore().getAt(r).get(nameOut);
+                                //        }
+                                //        catch(err){
+                                //            return'error';
+                                //        }
+                                //    }
+
+                                        //    alert(bssWorkflowStatusData);
+                                //    alert(bssWorkflowStatusData[BSSstatustype].id);
+                                //    alert(bssWorkflowStatusData[Ext.getCmp('idwsform').getForm().findField("idstatustype").getValue()].id);
+                                //    var idstatustypeval = bssWorkflowStatusData[Ext.getCmp('idwsform').getForm().findField("idstatustype").getValue()].id;
+                                //    alert("in save1");                                                                                                                                                                                              //    var idactiontypeval = bssWorkflowActionTypeData[Ext.getCmp('idwsform').getForm().findField("idactontype").getValue()].id;
+                                ///    alert("in save2");
+
+                               //     var idnotificationval = Ext.getCmp('idwsform').getForm().findField("idnotification").getValue();
+
+
+                               //     var idxlocval = Ext.getCmp('idwsform').getForm().findField("idxloc").getValue();
+                               //     var idylocval = Ext.getCmp('idwsform').getForm().findField("idyloc").getValue();
+
+ // alert('in uypdate why?');
+                                    var updSQLString = 'UPDATE AdvWorkflowStep SET '
+                                    + ' xloc = ' + idxlocval  + ","
+                                    + ' yloc = ' + idylocval  + ","
+                                    + ' name = ' + "'" + idnameval  + "'" + ","
+                                    + ' description = ' + "'" + iddescriptionval + "'"  + ","
+                                    + ' Revision = ' + "'" + idrevisionval + "'"  + ","
+                                    + ' statustype = ' + BSSNewStatusType  + ","
+                                    + ' ActionType = ' + "'" + BSSNewActionType  + "',"
+                                    + ' Notification = ' + "'" + BSSNewNotification  + "',"
+                                    + ' ActionURL = ' + "'" + idactionurlval  + "'"  + ","
+                                    + ' Instructions = ' + "'" + idinstructionsval  + "'"
+                                    + ' WHERE id = ' + idval;
+
+                                    alert(updSQLString);
+
+                                    BSSUserId = "0";
+
+                                    var xmlHttp = null;
+                                    xmlHttp = new XMLHttpRequest();
+                                    xmlHttp.open( "GET", "BSSPerformSQLCommand.php?BSSSQLCommand=" + updSQLString + "&userid=" + BSSUserId, false );
+                                    xmlHttp.send(null);
+
+                                    //alert(xmlHttp.responseText);
+
+                                }
+
+
+
+                            },{
+                                minWidth: 80,
+                                text: 'Cancel',
+                                handler: function(){alert('test');}
+                            }]
+                        }]
+
+
+
+                    });
+
+                    win.show();
+
+                }catch(e){alert(e.message)}
+
+            });
+
+
+                group.on("dragend", function() {
+
+
+                //check if dropped on existing node then return if so
+
+             //   alert(group.getAttrs().x);
+             //   alert(group.attrs.transposeY());
+
+            //     alert(group.getPosition().x);
+            //     alert(group.getPosition().y);
+
+                    var curx = 0;
+                    var cury = 0;
+                    curx = stage.getMousePosition().x;
+                    cury = stage.getMousePosition().y;
+
+           //     alert(stage.getMousePosition().x);
+           //     alert(stage.getMousePosition().y);
+
+            //    alert(curx);
+            //    alert(cury);
+
+         //       rcurx = Math.round(curx/70);
+         //       rcury = Math.round(cury/35);
+
+         //       ncurx = rcurx * 70;
+         //       ncury = rcury * 35;
+
+          //      alert(ncurx);
+          //      alert(ncury);
+
+
+         //       group.attrs.x = ncurx;
+         //       group.attrs.y = ncury;
+
+          //          group.moveTo(ncurx,ncury);
+
+                //group.setY(ncury);
+                //   group.setAbsolutePosition(ncurx,ncury);
+
+
+                //70 * X + 6 + StatusType.length,y: 35 * Y + 13
+                //xboxpendingtext.setAbsolutePosition(curx + 6 + StatusType.length,cury + 13);
+                //alert(xstepbox.getAttrs().id);
+
+
+                if(curx < 200 && cury > 500){
+
+
+                    this.hide();
+                    group.hide();
+
+                    // Put PHP Call here to delete the step
+                    //alert("BSSDeleteWorkflowStep.php?BSSWorkflowStepIdId=" + xstepbox.getAttrs().id + "&name=" + StatusType  + "&statustype=" + StatusType + "&xloc=" + 0 + "&yloc=" + 0);
+
+                    var xmlHttp = null;
+                    xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open( "GET", "BSSDeleteWorkflowStep.php?BSSWorkflowStepId=" + xstepbox.getAttrs().id , false );
+                    xmlHttp.send(null);
+
+                    layer.draw();
+
+                } else{
+
+                    // Put PHP Call here to UPDATE the step
+           //         alert("BSSUpdateWorkflowStepOnDrop.php?BSSWorkflowStepId=" + xstepbox.getAttrs().id + "&name=" + StatusType  + "$statustype=" + StatusType + "&xloc=" + group.attrs.x / 70 + "&yloc=" + group.attrs.y / 35);
+                    curx = curx - 35;
+                    cury = cury - 17;
+
+                    var xmlHttp = null;
+                    xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open( "GET", "BSSUpdateWorkflowStepOnDrop.php?BSSWorkflowStepId=" + xstepbox.getAttrs().id + "&name=" + StatusType  + "$statustype=" + StatusType + "&xloc=" + curx + "&yloc=" + cury, false );
+                    xmlHttp.send(null);
+
+               //     alert(xmlHttp.responseText);
+                }
+
+                 //   layer.draw();
+                //   group.setAbsolutePosition(ncurx,ncury);
+
+               //     GetWorkflowSteps("AdvWorkflows",workflowgrid,workflowstore);
+
+        });
+
+
+       // this.setAbsolutePosition(curx,cury);
+       //     alert('here');
+
+                curx = group.attrs.x; //stage.getMousePosition().x;
+                cury = group.attrs.y; //stage.getMousePosition().y;
+
+              //  alert('I is here');
+
+             //         alert(curx);
+             //         alert(cury);
+
+                rcurx = Math.round(curx/70);
+                rcury = Math.round(cury/35);
+
+                ncurx = rcurx * 70;
+                ncury = rcury * 35;
+
+                group.attrs.x = curx;
+                group.attrs.y = cury;
+
+          //      group.setAbsolutePosition(curx,cury);
+
+
+        layer.draw();
+
+        };  // End of Image setup
+
+       //     alert(BSSWorkflowId);
+
+            if(BSSWorkflowId < 1){
+                alert("Select a workflow first");
+                return;
+            }
+
+
+
+         //   $name = $_GET["name"];
+         //   $statustype = $_GET["statustype"];
+         //   $xloc = $_GET["xloc"];
+         //   $yloc = $_GET["yloc"];
+
+
+  //   alert("BSSCreateWorkflowStep.php?BSSMasterId=" + BSSWorkflowId + "&name=" + StatusType  + "&statustype=" + StatusType + "&xloc=" + 0 + "&yloc=" + 0);
+
+  //          var xmlHttp = null;
+  //          xmlHttp = new XMLHttpRequest();
+  //          xmlHttp.open( "GET", "BSSCreateWorkflowStep.php?BSSMasterId=" + BSSWorkflowId + "&name=" + StatusType  + "&statustype=" + StatusType + "&xloc=" + 0 + "&yloc=" + 0, false );
+  //          xmlHttp.send(null);
+
+  //          BSSStepId = xmlHttp.responseText;
+
+  //        alert("CREATE ID: " + xmlHttp.responseText);
+
+   //         try{
+   //            xstepbox.setAttrs().id = BSSStepId;
+    //        }catch(e){alert(e.message);}
+
+
+
+
+            return group;
+        }
+
+ function DrawForm(){
+
+/*
+           var layer = new Kinetic.Layer({ fill: "#B0D2FF"});       // "#B0D2FF"
+
+            var stage = new Kinetic.Stage({
+                container: "container",
+                width: 1100,
+                fill: "#00D2FF",
+                height: 600
+            });
+
+
+            PendingImage = new Image();
+            PendingImage.src = "Pending.png";
+            SubmitImage = new Image();
+            SubmitImage.src = "Submit.png";
+            ReviewImage = new Image();
+            ReviewImage.src = "Review.png";
+            ReleaseImage = new Image();
+            ReleaseImage.src = "Release.png";
+            CompleteImage = new Image();
+            CompleteImage.src = "Complete.png";
+            NotifyImage = new Image();
+            NotifyImage.src = "Notify.png";
+            ActionImage = new Image();
+            ActionImage.src = "Action.png";
+         */
+
+
+    //         ShowWF.onload = function() {
+             var boxwf = new Kinetic.Image({
+                 x: 0,y: 15,width: 70,height: 35,image: ShowWF,stroke: "#ababab",strokeWidth: 1,draggable: false
+             });
+
+             var boxwftext = new Kinetic.Text({
+                 x: 10,y: 29,text: "WORKFLOWS",fontSize: 6,fontFamily: "arial",textFill: "black"
+             });
+
+                boxwf.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+             });
+                boxwf.on("mouseout", function() {
+                document.body.style.cursor = "default";
+             });
+                boxwf.on("dblclick", function() {
+                    GetWorkFlowList();
+             });
+                boxwftext.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+             });
+                boxwftext.on("dblclick", function() {
+                    GetWorkFlowList();
+             });
+  //            layer.add(boxwf);
+  //            layer.add(boxwftext);
+ //             stage.add(layer);
+       //      };
+
+     //        StartImage.onload = function() {
+             var boxpending = new Kinetic.Image({
+                 x: 0,y: 50,width: 70,height: 35,image: StartImage,stroke: "#ababab",strokeWidth: 1,draggable: false
+             });
+
+             var boxpendingtext = new Kinetic.Text({
+                 x: 19,y: 60,text: "START",fontSize: 10,fontFamily: "Calibri",textFill: "green"
+             });
+
+             boxpending.on("mouseover", function() {
+                 document.body.style.cursor = "pointer";
+             });
+             boxpending.on("mouseout", function() {
+                 document.body.style.cursor = "default";
+             });
+             boxpending.on("dblclick", function() {
+                 var as1 = new AddStep('START',0,0,'',1,0);
+                 layer.add(as1);
+                 layer.draw();
+             });
+             boxpendingtext.on("mouseover", function() {
+                 document.body.style.cursor = "pointer";
+             });
+             boxpendingtext.on("dblclick", function() {
+                 var as1 = new AddStep('START',0,0,'',1,0);
+                 layer.add(as1);
+                 layer.draw();
+             //    stage.draw();
+             });
+
+  //          layer.add(boxpending);
+   //         layer.add(boxpendingtext);
+ //           stage.add(layer);
+
+      //      };
+
+
+         //   SubmitImage.onload = function() {
+            var boxsubmit = new Kinetic.Image({
+                x: 0,y:85 ,width: 70,height: 35,image: SubmitImage,stroke: "#ababab",strokeWidth: 1,draggable: false
+            });
+            var boxsubmittext = new Kinetic.Text({
+                x: 16,y: 95,text: "SUBMIT",fontSize: 10,fontFamily: "Calibri",textFill: "blue"
+            });
+            boxsubmit.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxsubmit.on("mouseout", function() {
+                document.body.style.cursor = "default";
+            });
+            boxsubmit.on("dblclick", function() {
+                var as1 = new AddStep('SUBMIT',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+            boxsubmittext.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxsubmittext.on("dblclick", function() {
+                var as1 = new AddStep('SUBMIT',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+
+    //        layer.add(boxsubmit);
+    //        layer.add(boxsubmittext);
+    //        stage.add(layer);
+
+        //    };
+
+
+         //   ReviewImage.onload = function() {
+            var boxreview = new Kinetic.Image({
+                x: 0,y: 120,width: 70,height: 35,image: ReviewImage,stroke: "#ababab",strokeWidth: 1,draggable: false
+            });
+            var boxreviewtext = new Kinetic.Text({
+                x: 18,y: 133,text: "REVIEW",fontSize: 8,fontFamily: "Calibri",textFill: "red"
+            });
+            boxreview.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxreview.on("mouseout", function() {
+                document.body.style.cursor = "default";
+            });
+            boxreview.on("dblclick", function() {
+                var as1 = new AddStep('REVIEW',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+            boxreviewtext.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxreviewtext.on("dblclick", function() {
+                var as1 = new AddStep('REVIEW',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+
+   //         layer.add(boxreview);
+   //         layer.add(boxreviewtext);
+   //         stage.add(layer);
+         //   };
+
+
+
+         //   ReleaseImage.onload = function() {
+            var boxrelease = new Kinetic.Image({
+                x: 0,y: 155,width: 70,height: 35,image: ReleaseImage,stroke: "#ababab",strokeWidth: 1,draggable: false
+            });
+
+            var boxreleasetext = new Kinetic.Text({
+                x: 14,y: 165,text: "RELEASE",fontSize: 10,fontFamily: "Calibri",textFill: "purple"
+            });
+            boxrelease.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxrelease.on("mouseout", function() {
+                document.body.style.cursor = "default";
+            });
+            boxrelease.on("dblclick", function() {
+                var as1 = new AddStep('RELEASE',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+            boxreleasetext.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxreleasetext.on("dblclick", function() {
+                var as1 = new AddStep('RELEASE',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+
+     //           layer.add(boxrelease);
+     //           layer.add(boxreleasetext);
+     //           stage.add(layer);
+        //    };
+
+
+
+
+       //     CompleteImage.onload = function() {
+            var boxcomplete = new Kinetic.Image({
+                x: 0,y: 190,width: 70,height: 35,image: CompleteImage,stroke: "#ababab",strokeWidth: 1,draggable: false
+            });
+            var boxcompletetext = new Kinetic.Text({
+                x: 6,y: 200,text: "COMPLETE",fontSize: 10,fontFamily: "Calibri",textFill: "green"
+            });
+            boxcomplete.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxcomplete.on("mouseout", function() {
+                document.body.style.cursor = "default";
+            });
+            boxcomplete.on("dblclick", function() {
+                var as1 = new AddStep('COMPLETE',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+            boxcompletetext.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxcompletetext.on("dblclick", function() {
+                var as1 = new AddStep('COMPLETE',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+
+   //             layer.add(boxcomplete);
+    //            layer.add(boxcompletetext);
+    //            stage.add(layer);
+       //     };
+
+
+       //     NotifyImage.onload = function() {
+            var boxnotify = new Kinetic.Image({
+                x: 0,y: 225,width: 70,height: 35,image: NotifyImage,stroke: "#ababab",strokeWidth: 1,draggable: false
+            });
+            var boxnotifytext = new Kinetic.Text({
+                x: 15,y: 235,text: "NOTIFY",fontSize: 10,fontFamily: "Calibri",textFill: "black"
+            });
+            boxnotify.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxnotify.on("mouseout", function() {
+                document.body.style.cursor = "default";
+            });
+            boxnotify.on("dblclick", function() {
+                var as1 = new AddStep('NOTIFY',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+            boxnotifytext.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxnotifytext.on("dblclick", function() {
+                var as1 = new AddStep('NOTIFY',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+
+     //           layer.add(boxnotify);
+     //           layer.add(boxnotifytext);
+    //            stage.add(layer);
+       //     };
+
+
+      //      ActionImage.onload = function() {
+            var boxaction = new Kinetic.Image({
+                x: 0,y: 260,width: 70,height: 35,image: ActionImage,stroke: "#ababab",strokeWidth: 1,draggable: false
+            });
+            var boxactiontext = new Kinetic.Text({
+                x: 14,y: 270,text: "ACTION",fontSize: 10,fontFamily: "Calibri",textFill: "brown"
+            });
+            boxaction.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxaction.on("mouseout", function() {
+                document.body.style.cursor = "default";
+            });
+            boxaction.on("dblclick", function() {
+                var as1 = new AddStep('ACTION',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+            boxactiontext.on("mouseover", function() {
+                document.body.style.cursor = "pointer";
+            });
+            boxactiontext.on("dblclick", function() {
+                var as1 = new AddStep('ACTION',0,0,'',1,0);
+                layer.add(as1);
+                layer.draw();
+            });
+
+     //           layer.add(boxaction);
+     //           layer.add(boxactiontext);
+    //            stage.add(layer);
+        //    };
+
+     ActionImage.onload = function() {
+   //  layer.add(boxaction);
+   //  layer.add(boxactiontext);
+     stage.add(layer);
+     };
+
+     try{
+
+        //    layer.add(boxpending);
+        //    layer.add(boxpendingtext);
+        //    layer.add(boxsubmit);
+       //     layer.add(boxsubmittext);
+       //     layer.add(boxreview);
+       //     layer.add(boxreviewtext);
+       //     layer.add(boxrelease);
+       //     layer.add(boxreleasetext);
+       //     layer.add(boxcomplete);
+       //     layer.add(boxcompletetext);
+       //     layer.add(boxnotify);
+       //     layer.add(boxnotifytext);
+       //     layer.add(boxaction);
+       //     layer.add(boxactiontext);
+
+    //        stage.add(layer);
+
+ //ZZZ           stage.draw();
+ //ZZZ           layer.draw();
+
+     }catch(e){alert(e.getMessage);}
+
+     }
+
+
+    function GetWorkflowSteps(BSSWorkflowId){
+
+//        alert("get steps");
+
+  //      var sm = BSSGrid.getSelectionModel();
+  //      var selrecords =  sm.getSelection();
+  //      var fieldname = "id";
+  //      var BSSStatusType = 0;
+
+/*
+        layer = new Kinetic.Layer({ fill: "#B0D2FF"});       // "#B0D2FF"
+
+        stage = new Kinetic.Stage({
+            container: "container",
+            width: 1100,
+            fill: "#00D2FF",
+            height: 600
+        });
+  */
+
+      //  stage.clear();
+    //    stage.remove(layer);
+
+    //    stage.add(layer);
+
+        layer.removeChildren();
+        DrawForm();
+
+//        alert(selrecords[0].get('id'));
+
+        BSSWorkflowId = BSSWFID;
+
+        try{
+
+
+            var xmlHttp = null;
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", "BSSGetWorkflowInstanceSteps.php?BSSWorkflowId=" + BSSWorkflowId + "&BSSUserId=1", false);
+            xmlHttp.send(null);
+            var BSSWorkflowSteps = eval('[' + xmlHttp.responseText + ']');
+      //      alert(BSSWorkflowSteps);
+
+
+            for(x=0; x<BSSWorkflowSteps.length; x++){
+
+       //     alert(BSSWorkflowSteps[x].id);
+        //    alert(BSSWorkflowSteps[x].xloc);
+     //       alert("Status Type: " + BSSWorkflowSteps[x].statustype);
+
+                //    alert(StatusType);
+                switch(BSSWorkflowSteps[x].statustype)
+                {
+                    case "1":
+                        BSSStatusType = "START";
+                        break;
+                    case "2":
+                        BSSStatusType = "SUBMIT";
+                        break;
+                    case "3":
+                        BSSStatusType = "REVIEW";
+                        break;
+                    case "4":
+                        BSSStatusType = "RELEASE";
+                        break;
+                    case "5":
+                        BSSStatusType = "COMPLETE";
+                        break;
+                    case "6":
+                        BSSStatusType = "ACTION";
+                        break;
+                    case "7":
+                        BSSStatusType = "NOTIFY";
+                        break;
+                }
+
+            //    alert("Adding Step");
+
+                var as1 = new AddStep(BSSStatusType,BSSWorkflowSteps[x].xloc,BSSWorkflowSteps[x].yloc,BSSWorkflowSteps[x].name,0,BSSWorkflowSteps[x].id);
+                layer.add(as1);
+                layer.draw();
+
+
+            }
+
+
+        }catch(e)
+        {    alert(e.message);
+        }
+
+
+    }
+
+
+    function AddApprovers()
+    {
+
+        //Add get uers authorized to sign off
+        //custom user store
+
+              alert('Here');
+          /*
+        var sm = workflows.getSelectionModel();
+
+        try{
+            if (sm.getCount() == 0) {
+                return;
+            }
+
+            var selrecords = sm.getSelection();
+            var fieldname = "id";
+            var BSSWorkflowId = selrecords[0].get('id');
+
+        }catch(e)
+        {
+            alert(e.message);
+        }
+
+        */
+
+
+        var msg = function(title, msg) {
+            Ext.Msg.show({
+                title: title,
+                msg: msg,
+                minWidth: 200,
+                modal: true,
+                icon: Ext.Msg.INFO,
+                buttons: Ext.Msg.OK
+            });
+        };
+
+        var getsignoffuser = Ext.create('Ext.form.Panel', {
+            //   renderTo: 'editor-grid',
+            id: 'idgetuser',
+            width: 500,
+            frame: true,
+            title: 'Add Approver',
+            bodyPadding: '10 10 0',
+
+            defaults: {
+                anchor: '100%',
+                allowBlank: false,
+                msgTarget: 'side',
+                labelWidth: 70
+            },
+
+            items:[{
+                id: 'idAddWorkflowApprover',
+                //     disabled: false,
+                //    width: 180,
+                name: 'txtuserlist',
+                xtype: 'combobox',
+                fieldLabel: 'Approver',
+                queryMode: 'local',
+                fields:['id', 'value'],
+                store: userliststore,
+                displayField: 'value',
+                valueField: 'id',
+                grow: true,
+                labelPad: 10,
+                labelWidth: 80,
+                labelAlign: 'right'
+            }
+            ],
+
+            buttons: [{
+                text: 'Select',
+                handler: function(){
+
+                    try{
+                        var ApproverUserId = Ext.getCmp('idgetuser').getForm().findField("idAddWorkflowApprover").getValue();
+                        var BSSSQLCommand = "INSERT INTO SignOffs(masterid,WorkflowApprover)VALUES(" + BSSWorkflowStepId + "," + ApproverUserId + ")";
+
+                        //alert(BSSSQLCommand);
+
+                        // iterate here on the ids in the sign offs tab  Google: How to iterate on a sencha data grid
+
+
+
+
+
+                        var xmlHttp = null;
+                        xmlHttp = new XMLHttpRequest();
+                        xmlHttp.open( "GET", "BSSPerformSQLCommand.php?BSSSQLCommand=" + BSSSQLCommand + "&userid=" + BSSUserId, false );
+                        xmlHttp.send(null);
+
+                        //alert(xmlHttp.responseText);
+                        //newdata = eval('[' + xmlHttp.responseText + ']');
+                        //BSSStore.add(newdata);
+                        GetSignOffs();
+                        absoluteuser.close();
+                        //this.up('form').getForm().close();
+                        //Ext.getCmp('idgetuser').close();
+
+
+                    }catch(e)
+                    {document.write("<p>" + e.message + "</p>");
+                    }
+
+
+                }
+            },{
+                text: 'Close',
+                handler: function() {
+                    absoluteuser.close();
+                    this.up('form').getForm().close();
+                    Ext.getCmp('idgetuser').close();
+                    GetSignOffs();
+                }
+            }]
+        });
+
+        absoluteuser = Ext.create('Ext.window.Window', {
+            //  title: 'File Upload',
+            width: 510,
+            height: 140,
+            layout:'absolute',
+            defaults: {
+                bodyStyle: 'padding:10px'
+            },
+            items: [getsignoffuser]
+        });
+
+
+        try{
+            absoluteuser.show();
+        }catch(e){
+            alert(e.message);
+        }
+
+    }
+
+
+    function removeApprovers()
+    {
+
+
+        var sm = signoffs.getSelectionModel();
+
+        try{
+            if (sm.getCount() == 0) {
+                return;
+            }
+            var selrecords = sm.getSelection();
+            var BSSWorkflowApproverId = selrecords[0].get('id');
+            var BSSSignOffResult = selrecords[0].get('SignoffResult');
+            var BSSSQLCommand = "DELETE FROM SignOffs WHERE id = " + BSSWorkflowApproverId;
+
+            // add message do you wish to remove user: X
+
+            if(BSSSignOffResult > 0){
+                alert("User has already Signed Off");
+                return;
+            }
+
+            //alert(BSSSQLCommand);
+
+            var xmlHttp = null;
+            xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "GET", "BSSPerformSQLCommand.php?BSSSQLCommand=" + BSSSQLCommand + "&userid=" + BSSUserId, false );
+            xmlHttp.send(null);
+
+            //alert(xmlHttp.responseText);
+
+            GetSignOffs();
+
+
+        }catch(e)
+        {
+            alert(e.message);
+        }
+    }
+
+
+    function GetSignOffs()
+    {
+        //Get the workflow
+
+        try{
+
+        //    var sm =  workflows.getSelectionModel();
+       //     var selrecords = sm.getSelection();
+
+      //      if(sm.getCount() > 0){
+
+
+         //   BSSWorkflowStepId = xstepbox.getAttrs().id;
+
+       //     alert(BSSWorkflowStepId);
+
+
+            varWorkflowId = BSSWorkflowStepId;
+
+                try{
+                    //Get the data
+                    xmlHttp = new XMLHttpRequest();
+                    varQueryId = 0;
+                    xmlHttp.open( "GET", "BSSGetJSData.php5?BSSConfigName=" + "SignOffs" + "&BSSQueryId=" + "" + "&BSSWhereClause=" + "masterid = " + varWorkflowId + " ORDER BY sequence,id DESC", false );
+                    xmlHttp.send( null );
+                    //alert(xmlHttp.responseText);
+                    var newdata = eval('[' + xmlHttp.responseText + ']');
+                    signoffsStore.loadData(newdata,false);
+                }catch(e)
+                {alert("Signoff Data Get ERROR: " + e.message);
+                }
+
+                //   alert(varRecordId);
+       //     }else
+       //     {
+       //         return;
+       //     }
+
+        }catch(e)
+        {document.write(alert(e.message));
+        }
+
+    }
+
+    function getUrlVars() {
+        var vars = {};
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            vars[key] = value;
+        });
+        return vars;
+    }
+
+
+
+    function saveStep(){
+
+    }
+
+
+    function deleteStep(){
+
+    }
+
+
+
+
+
+
+    </script>
+</head>
+<body>
+<div id="container"></div>
+</body>
+</html>

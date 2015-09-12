@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+      canvas {
+        border: 1px solid #9C9898;
+      }
+    </style>
+    <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.0.0.js"></script>
+    <script>
+      window.onload = function() {
+        var stage = new Kinetic.Stage({
+          container: 'container',
+          width: 578,
+          height: 200
+        });
+        var layer = new Kinetic.Layer();
+        var rectX = stage.getWidth() / 2 - 50;
+        var rectY = stage.getHeight() / 2 - 25;
+
+          PendingImage = new Image();
+          PendingImage.src = "Pending.png";
+
+          var boxpending = new Kinetic.Image({
+              x: 0,y: 50,width: 70,height: 35,image: PendingImage,stroke: "white",strokeWidth: 1,draggable: false
+          });
+
+
+      //    boxpending.
+
+          var boxpendingtext = new Kinetic.Text({
+              x: 19,y: 60,text: "START",fontSize: 10,fontFamily: "Calibri",textFill: "green"
+          });
+
+          boxpending.on("mouseover", function() {
+              document.body.style.cursor = "pointer";
+          });
+          boxpending.on("mouseout", function() {
+              document.body.style.cursor = "default";
+          });
+          boxpending.on("dblclick", function() {
+              var as1 = new AddStep('PENDING',0,0);
+              layer.add(as1);
+              layer.draw();
+          });
+          boxpendingtext.on("mouseover", function() {
+              document.body.style.cursor = "pointer";
+          });
+          boxpendingtext.on("dblclick", function() {
+              var as1 = new AddStep('PENDING',0,0);
+              layer.add(as1);
+              layer.draw();
+          });
+
+
+
+          var box = new Kinetic.Rect({
+          x: rectX,
+          y: rectY,
+          width: 100,
+          height: 50,
+          fill: '#00D2FF',
+          stroke: 'black',
+          strokeWidth: 4,
+          draggable: true
+        });
+
+        // add cursor styling
+        box.on('mouseover', function() {
+          document.body.style.cursor = 'pointer';
+        });
+        box.on('mouseout', function() {
+          document.body.style.cursor = 'default';
+        });
+
+        layer.add(boxpending);
+          layer.add(box);
+        stage.add(layer);
+      };
+
+    </script>
+  </head>
+  <body onmousedown="return false;">
+    <div id="container"></div>
+  </body>
+</html>

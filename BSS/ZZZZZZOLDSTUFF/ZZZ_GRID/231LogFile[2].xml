@@ -1,0 +1,190 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE import-log [
+<!ELEMENT import-log (begin-import,record-summary*,(note|warning|error|fatal)*,validate-summary?,end-import)>
+<!ELEMENT begin-import (#PCDATA)>
+<!ATTLIST begin-import timestamp CDATA #REQUIRED>
+<!ELEMENT note (#PCDATA)>
+<!ATTLIST note
+	context CDATA     #IMPLIED
+	line CDATA     #IMPLIED
+	type CDATA     #IMPLIED
+>
+<!ELEMENT warning (#PCDATA)> 
+<!ATTLIST warning
+	context CDATA     #IMPLIED
+	line CDATA     #IMPLIED
+	type CDATA     #IMPLIED
+	errorcode CDATA     #IMPLIED
+	keyword CDATA     #IMPLIED
+>
+<!ELEMENT error (#PCDATA)>
+<!ATTLIST error
+	context CDATA     #IMPLIED 
+	line CDATA     #IMPLIED 
+	type CDATA     #IMPLIED
+	errorcode CDATA     #IMPLIED 
+	keyword CDATA     #IMPLIED
+>
+<!ELEMENT fatal (#PCDATA)>
+<!ATTLIST fatal
+	context CDATA     #IMPLIED 
+	line CDATA     #IMPLIED 
+	type CDATA     #IMPLIED
+	errorcode CDATA     #IMPLIED 
+	keyword CDATA     #IMPLIED
+>
+<!ELEMENT validate-summary EMPTY>
+<!ATTLIST validate-summary
+	warning NMTOKEN #REQUIRED
+	error NMTOKEN #REQUIRED
+	fatal CDATA #REQUIRED
+>
+<!ELEMENT record-summary EMPTY>
+<!ATTLIST record-summary
+	accepted NMTOKEN #REQUIRED
+	ignored NMTOKEN #REQUIRED
+	import-type CDATA #REQUIRED
+	rejected NMTOKEN #REQUIRED
+>
+<!ELEMENT end-import (#PCDATA)>
+<!ATTLIST end-import
+	fatal NMTOKEN #REQUIRED
+	timestamp CDATA #REQUIRED
+>
+]>
+<import-log>
+<begin-import timestamp="08/31/2012 12:21:09 PM PDT">Begin import.</begin-import>
+<record-summary import-type="Item &lt;Created&gt;" accepted="65" rejected="0" ignored="0"/>
+<record-summary import-type="Item &lt;Updated&gt;" accepted="1" rejected="65" ignored="0"/>
+<note>The &apos;Operation&apos; object &apos;OSP005026&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Packaging&apos; object &apos;PKG000194&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002902&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002927&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005043&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005039&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Packaging&apos; object &apos;PKG000193&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005051&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;SE Finished Goods&apos; object &apos;FGE000082&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002912&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002926&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005041&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002916&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002909&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002917&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002906&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002899&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002911&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002903&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005025&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005037&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002907&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002913&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005040&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002915&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002923&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002905&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005044&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005038&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005033&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005045&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002914&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005053&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Master&apos; object &apos;NFL1236&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002921&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002922&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002904&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002919&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005046&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005032&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005024&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005049&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002900&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005034&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002924&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005048&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005050&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002918&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005036&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002910&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005047&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;SE Finished Goods&apos; object &apos;FGC000108&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002925&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005027&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005035&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002908&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005030&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002901&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005052&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005029&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Packaging&apos; object &apos;PKG000195&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005028&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Component&apos; object &apos;CMP002920&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005031&apos; which doesn&apos;t exist in system was created during import.</note>
+<note>The &apos;Operation&apos; object &apos;OSP005042&apos; which doesn&apos;t exist in system was created during import.</note>
+<error>The cover page, p2, p3 attributes of the object(CMP002923) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005042) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002918) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005028) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002913) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005047) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005032) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002901) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005037) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005025) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002917) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005052) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005048) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(FGB000358) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005050) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(PKG000195) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002915) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005033) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005049) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005026) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005046) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002925) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002910) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002922) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(PKG000193) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005035) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002905) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005029) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002900) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(FGE000082) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002903) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002902) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005038) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005045) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(FGC000108) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002907) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005040) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002914) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002916) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005041) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005053) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005036) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002899) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002904) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002912) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002920) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005043) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005027) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005051) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002908) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002927) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(PKG000194) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005034) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002919) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005031) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002924) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005024) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002911) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002921) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005039) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002909) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005044) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002926) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(OSP005030) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<error>The cover page, p2, p3 attributes of the object(CMP002906) are not updated. Get exception during process:The Parts table cannot be modified due to insufficient privileges or business rules.</error>
+<end-import timestamp="08/31/2012 12:21:17 PM PDT" fatal="false">Complete import.</end-import>
+</import-log>
